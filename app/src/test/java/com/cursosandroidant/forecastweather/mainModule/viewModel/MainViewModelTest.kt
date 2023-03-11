@@ -1,6 +1,7 @@
 package com.cursosandroidant.forecastweather.mainModule.viewModel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.cursosandroidant.forecastweather.common.DataAccess.JSONFileLoader
 import com.cursosandroidant.forecastweather.common.dataAccess.WeatherForecastService
 import com.cursosandroidant.historicalweatherref.getOrAwaitValue
 import kotlinx.coroutines.*
@@ -105,8 +106,26 @@ class MainViewModelTest {
                     "metric", "en")
 
                 val result = viewModel.getResult().getOrAwaitValue()
+                println("result: $result")
                 assertThat(result?.hourly?.size, `is` (48))
             }
+        }
+    }
+
+    @Test
+    fun `check hourly size remote with local response`(){
+        runBlocking {
+            val remoteResult = service.getWeatherForecastByCoordinates(
+                19.432608,
+                -99.133209,
+                "fdbcfef5d14487a138b55af24d1cf470",
+                "metric", "en")
+
+            val localResult = JSONFileLoader().loadWeatherForecastEntity("weather_forecast_response_sucess")
+
+           //compare remoteResult with localResult
+            assertThat(localResult?.hourly?.size, `is` (remoteResult.hourly?.size))
+            assertThat(localResult?.timezone, `is` (remoteResult.timezone))
         }
     }
 }
